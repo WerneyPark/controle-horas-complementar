@@ -1,0 +1,14 @@
+{
+  "name": "controle-horas-complementar",
+  "version": "1.0.0",
+  "description": "Aplicativo desktop leve para controle de horas complementares da faculdade",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

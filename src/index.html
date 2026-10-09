@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Horas Complementares</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Barra Lateral de Navegação -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-row">
+          <div class="logo-icon">⏱</div>
+          <div>
+            <div class="logo-title">Horas Complementares</div>
+            <div class="logo-subtitle" id="sidebar-curso-nome">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="home">
+          <span class="nav-icon">🏠</span>
+          <span>Início / Resumo</span>
+        </button>
+        <button class="nav-item" data-view="tipos">
+          <span class="nav-icon">🗂️</span>
+          <span>Tipos de Atividades</span>
+        </button>
+        <button class="nav-item" data-view="atividades">
+          <span class="nav-icon">➕</span>
+          <span>Lançar Atividades</span>
+        </button>
+        <button class="nav-item" data-view="relatorio">
+          <span class="nav-icon">📊</span>
+          <span>Relatório Completo</span>
+        </button>
+        <button class="nav-item" data-view="config">
+          <span class="nav-icon">⚙️</span>
+          <span>Configurações & Backup</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-badge-local">
+          <span class="status-dot"></span>
+          <span id="footer-storage-mode">Armazenamento Local Seguro</span>
+        </div>
+        <div>Versão 1.0.0</div>
+      </div>
+    </aside>
+
+    <!-- Área Principal de Conteúdo -->
+    <main class="main-wrapper">
+      <header class="top-bar">
+        <div class="top-bar-title">
+          <h1 id="page-title">Resumo de Horas</h1>
+          <p id="page-subtitle">Acompanhe seu progresso e exigências do curso</p>
+        </div>
+        <div class="top-bar-actions" id="top-bar-actions">
+          <!-- Ações contextuais injetadas dinamicamente -->
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- VIEW: HOME (RESUMO) -->
+        <section id="view-home" class="view active">
+          <!-- Cards de Totais -->
+          <div class="cards-grid">
+            <div class="card card-info">
+              <span class="card-label">Exigido pelo Curso</span>
+              <span class="card-value" id="card-exigido">0h</span>
+              <span class="card-subtext" id="card-exigido-sub">Meta estabelecida</span>
+            </div>
+            <div class="card card-success">
+              <span class="card-label">Horas Feitas (Oficial)</span>
+              <span class="card-value" id="card-oficial">0h</span>
+              <span class="card-subtext">Apenas atividades aceitas</span>
+            </div>
+            <div class="card card-primary">
+              <span class="card-label">Total Previsto</span>
+              <span class="card-value" id="card-previsto">0h</span>
+              <span class="card-subtext">Aceitas + em análise</span>
+            </div>
+            <div class="card card-warning" id="card-faltante-wrapper">
+              <span class="card-label" id="card-faltante-label">Horas Faltantes</span>
+              <span class="card-value" id="card-faltante">0h</span>
+              <span class="card-subtext" id="card-faltante-sub">Para atingir a meta</span>
+            </div>
+          </div>
+
+          <!-- Barra de Progresso do Curso -->
+          <div class="progress-card">
+            <div class="progress-header">
+              <span class="progress-title">Progresso Geral do Curso</span>
+              <span class="progress-percent" id="progresso-percent-text">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill-previsto" id="progresso-bar-previsto" style="width: 0%"></div>
+              <div class="progress-bar-fill" id="progresso-bar-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-legend">
+              <div class="legend-item">
+                <span class="legend-color" style="background: var(--primary);"></span>
+                <span>Oficial (Aceitas)</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background: #93c5fd;"></span>
+                <span>Previsto (Inclui Pendentes)</span>
+              </div>
+              <div class="legend-item" id="legend-excedente-curso" style="display: none;">
+                <span class="legend-color" style="background: var(--success);"></span>
+                <span id="legend-excedente-texto">Meta do curso cumprida!</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Aproveitamento por Tipo -->
+          <div class="section-panel">
+            <div class="panel-header">
+              <span class="panel-title">Aproveitamento por Tipo de Atividade</span>
+              <button class="btn btn-secondary btn-sm" id="btn-ir-tipos">Gerenciar Tipos</button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Atividade</th>
+                    <th>Horas Aceitas</th>
+                    <th>Limite Máximo</th>
+                    <th>Horas Aproveitadas</th>
+                    <th>Excedente (Não Conta)</th>
+                    <th>Progresso do Tipo</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-home-tipos">
+                  <!-- Inserido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: TIPOS DE ATIVIDADE -->
+        <section id="view-tipos" class="view">
+          <div class="section-panel">
+            <div class="panel-header">
+              <span class="panel-title">Tipos de Atividades Cadastrados</span>
+              <button class="btn btn-primary btn-sm" id="btn-novo-tipo">➕ Novo Tipo de Atividade</button>
+            </div>
+            <div class="panel-body" style="padding-bottom: 0;">
+              <p style="font-size: 13px; color: var(--neutral-600); margin-bottom: 16px;">
+                Defina os grupos de atividades aceitos pela faculdade e o limite máximo de horas que cada um permite acumular. Deixe o limite em branco se não houver teto.
+              </p>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome do Tipo</th>
+                    <th>Limite de Horas</th>
+                    <th>Atividades Lançadas</th>
+                    <th>Total Aceito</th>
+                    <th>Aproveitado</th>
+                    <th style="text-align: right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-tipos">
+                  <!-- Inserido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: LANÇAR ATIVIDADES -->
+        <section id="view-atividades" class="view">
+          <div class="section-panel">
+            <div class="panel-header">
+              <span class="panel-title">Atividades Feitas</span>
+              <button class="btn btn-primary btn-sm" id="btn-nova-atividade">➕ Lançar Nova Atividade</button>
+            </div>
+
+            <!-- Filtros Rápidos -->
+            <div style="padding: 16px 20px; background: var(--neutral-50); border-bottom: 1px solid var(--neutral-200); display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+              <input type="text" id="filtro-busca" class="form-input" placeholder="Buscar por nome da atividade..." style="max-width: 260px;">
+              <select id="filtro-tipo" class="form-select" style="max-width: 220px;">
+                <option value="">Todos os tipos</option>
+              </select>
+              <select id="filtro-status" class="form-select" style="max-width: 180px;">
+                <option value="">Todos os status</option>
+                <option value="aceita">Apenas Aceitas</option>
+                <option value="pendente">Apenas Em Branco (Pendentes)</option>
+                <option value="recusada">Apenas Não Aceitas</option>
+              </select>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Nome da Atividade</th>
+                    <th>Horas</th>
+                    <th>Status da Validação</th>
+                    <th style="text-align: right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-atividades">
+                  <!-- Inserido dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: RELATÓRIO COMPLETO -->
+        <section id="view-relatorio" class="view">
+          <!-- Cabeçalho exclusivo para impressão -->
+          <div class="relatorio-header-print" style="display: none;">
+            <h1 style="font-size: 22px; margin-bottom: 4px;">Relatório de Horas Complementares</h1>
+            <p style="font-size: 14px; color: #555555;" id="print-curso-info"></p>
+          </div>
+
+          <div class="section-panel no-print" style="margin-bottom: 20px;">
+            <div class="panel-header">
+              <div>
+                <span class="panel-title">Relatório Geral Agrupado</span>
+                <p style="font-size: 12px; color: var(--neutral-500); margin-top: 2px;">
+                  Visualize todas as suas atividades separadas por grupo de tipo de atividade
+                </p>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-imprimir-relatorio">
+                🖨️ Imprimir / Salvar PDF
+              </button>
+            </div>
+          </div>
+
+          <div id="relatorio-conteudo-grupos">
+            <!-- Grupos de tipos e suas atividades injetados dinamicamente -->
+          </div>
+        </section>
+
+        <!-- VIEW: CONFIGURAÇÕES & BACKUP -->
+        <section id="view-config" class="view">
+          <div class="section-panel">
+            <div class="panel-header">
+              <span class="panel-title">Configurações do Curso</span>
+            </div>
+            <div class="panel-body">
+              <form id="form-config">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="config-curso-nome">Nome do Curso / Faculdade</label>
+                    <input type="text" id="config-curso-nome" class="form-input" placeholder="Ex: Engenharia de Software">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="config-total-horas">Total de Horas Exigido pelo Curso</label>
+                    <input type="text" id="config-total-horas" class="form-input" placeholder="Ex: 200h, 150, 180.5">
+                    <span class="form-help">Pode digitar em horas (ex: 200h ou 150.5)</span>
+                  </div>
+                </div>
+                <div style="margin-top: 10px;">
+                  <button type="submit" class="btn btn-primary">Salvar Configurações</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="section-panel">
+            <div class="panel-header">
+              <span class="panel-title">Backup e Segurança dos Dados</span>
+            </div>
+            <div class="panel-body">
+              <p style="font-size: 13px; color: var(--neutral-600); margin-bottom: 16px;">
+                Seus dados ficam gravados com total privacidade no seu próprio computador. Você pode exportar um arquivo de backup (.json) para guardar no seu e-mail ou pendrive, ou restaurar quando quiser.
+              </p>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="btn-exportar-backup">
+                  💾 Exportar Arquivo de Backup (JSON)
+                </button>
+                <label class="btn btn-secondary" style="margin: 0; cursor: pointer;">
+                  📂 Importar Backup
+                  <input type="file" id="input-importar-backup" accept=".json" style="display: none;">
+                </label>
+                <button class="btn btn-secondary" id="btn-carregar-exemplo">
+                  ✨ Carregar Dados de Exemplo
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR TIPO -->
+  <div class="modal-overlay" id="modal-tipo">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-tipo-title">Novo Tipo de Atividade</h2>
+        <button class="btn-icon" id="btn-fechar-modal-tipo">✕</button>
+      </div>
+      <form id="form-tipo">
+        <div class="modal-body">
+          <input type="hidden" id="tipo-id">
+          <div class="form-group">
+            <label class="form-label" for="tipo-nome">Nome do Tipo de Atividade *</label>
+            <input type="text" id="tipo-nome" class="form-input" placeholder="Ex: Cursos de Extensão, Palestras, Voluntariado" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tipo-limite">Limite de Horas Permitido</label>
+            <input type="text" id="tipo-limite" class="form-input" placeholder="Ex: 60h, 40, 12h30 (vazio = sem limite)">
+            <span class="form-help">Deixe em branco se a faculdade não impõe limite máximo para este tipo.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-tipo">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-tipo">Salvar Tipo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR ATIVIDADE -->
+  <div class="modal-overlay" id="modal-atividade">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-atividade-title">Lançar Atividade Feita</h2>
+        <button class="btn-icon" id="btn-fechar-modal-atividade">✕</button>
+      </div>
+      <form id="form-atividade">
+        <div class="modal-body">
+          <input type="hidden" id="atividade-id">
+          <div class="form-group">
+            <label class="form-label" for="atividade-tipo-id">Tipo de Atividade *</label>
+            <select id="atividade-tipo-id" class="form-select" required>
+              <option value="">Selecione um tipo...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="atividade-nome">Nome da Atividade *</label>
+            <input type="text" id="atividade-nome" class="form-input" placeholder="Ex: Curso de Inglês Avançado, Congresso de TI" required>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="atividade-horas">Quantidade de Horas *</label>
+              <input type="text" id="atividade-horas" class="form-input" placeholder="Ex: 20h, 1h30, 1.5, 40" required>
+              <span class="form-help">Aceita formatos como 20h, 1,5h ou 1h30</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="atividade-data">Data da Atividade</label>
+              <input type="date" id="atividade-data" class="form-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="atividade-status">Validação da Faculdade</label>
+            <select id="atividade-status" class="form-select">
+              <option value="">Em branco (Aguardando análise da faculdade)</option>
+              <option value="aceita">Aceita (Aprovada)</option>
+              <option value="recusada">Não aceita (Recusada)</option>
+            </select>
+            <span class="form-help">Você pode deixar em branco e alterar a qualquer momento com um clique.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-atividade">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-atividade">Salvar Atividade</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Container de Toasts -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Script Principal -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
